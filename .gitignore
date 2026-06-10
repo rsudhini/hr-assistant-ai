@@ -102,3 +102,4 @@ qdrant_storage/
 # Generated Documents
 # =========================
 uploads/
+/.metadata/

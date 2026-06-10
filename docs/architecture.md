@@ -62,15 +62,47 @@ Desktop-first
 
 ## High-Level Architecture
 
-...
+React UI
+   ↓
+Spring Boot AI Service
+   ↓
+RAG Retrieval Layer
+   ↓
+Vector DB
+   ↓
+LLM API
 
 ## Ingestion Pipeline
 
-...
+•	chunk size: around 500 words
+•	overlap: 25 words 
+•	embedding model:  Jina Embeddings v2/v5
+•	vector schema: 
+| Field | Purpose | Example |
+| :--- | :--- | :--- |
+| **id**        | Unique identifier for each record | `"hr_001"` |
+| **vector**    | Numerical embedding array         | `[0.12, -0.45, 0.87, ...]` |
+| **text**      | Original raw text or chunk        | `"Performance reviews are conducted annually."` |
+| **metadata**  | Key-value pairs for filtering     | `{"department": "HR", "subdomain": "Performance Management", "document_name": "HR_Performance_Policy.pdf", "section": "3.2"}` |
+| **timestamp** | Versioning                        | `"2026-06-03T15:17:00Z"` |
+•	parsing strategy: Chunking and metadata tagging
+•	async ingestion jobs: need help
+•	document versioning: document name at the end will add document version
+•	failure handling: in case of any failure, write to logs, monitoring tool to be configured to alert in slack channel. Retry 2 times with back off strategy.
+
 
 ## Retrieval Pipeline
 
-...
+Query becomes embedding
+I will be using selected embedding model to convert query into embedding
+Top-k chunks are retrieved
+Application will query vector database with embedding query to get the Top-k chunks, earlier defined Top-k as 3
+Context is assembled
+Application layer will apply the metadata filter to get the Context
+Prompt is constructed
+Application layer constructs the Prompt with Embedding Query, Context, Injects System Prompt
+Citations from the retrieved context are attached like Document name, section name
+"I don't know" is triggered if the information is not found in the context
 
 ## Architectural Decisions
 
